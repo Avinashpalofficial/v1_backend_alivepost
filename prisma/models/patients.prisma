@@ -1,13 +1,86 @@
-model patients {
-    id            Int             @id @default(autoincrement())
-    name          String
-    phone         String
-    age           Int
-    bloodgroup    String
-    address       String
-    diseases      diseases[]
-    prescriptions prescriptions[]
+model Patient {
+  id               Int                 @id @default(autoincrement())
+  name             String
+  dateOfBirth      DateTime
+  bloodGroup       String
+  gender           Gender
+  mobileNumber     String              @unique
+  medicalHistory   MedicalHistory[]
+  conditions       PatientCondition[]
+  medicines        MedicineAllotted[]
+  createdAt        DateTime            @default(now())
+  updatedAt        DateTime            @updatedAt
+}
 
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+enum Gender {
+  male
+  female
+  others
+}
+model MedicalHistory {
+  id          Int       @id @default(autoincrement())
+  diseaseId   Int
+  disease     Disease   @relation(fields: [diseaseId], references: [id])
+  description String?
+  startDate   DateTime
+  endDate     DateTime?
+  patientId   Int
+  patient     Patient   @relation(fields: [patientId], references: [id])
+  createdAt   DateTime  @default(now())
+}
+
+model PatientCondition {
+  id              Int                     @id @default(autoincrement())
+  patientId       Int
+  patient         Patient                 @relation(fields: [patientId], references: [id])
+  diseaseId       Int
+  disease         Disease @relation(fields: [diseaseId], references: [id])
+  status          PatientConditionStatus
+  startDate       DateTime
+  endDate         DateTime?
+  patientProgress PatientProgress[]
+  createdAt       DateTime                @default(now())
+  updatedAt       DateTime                @updatedAt
+}
+
+enum PatientConditionStatus {
+  STABLE
+  CRITICAL
+  RECOVERED
+}
+
+
+model MedicineAllotted {
+  id         Int               @id @default(autoincrement())
+  patientId  Int
+  patient    Patient           @relation(fields: [patientId], references: [id])
+  medicineId Int
+  medicine   Medicine          @relation(fields: [medicineId], references: [id])
+  quantity   Int               @default(1)
+  tillDate   DateTime
+  timings    MedicineTimings[]
+}
+model MedicineTimings {
+  id                 Int               @id @default(autoincrement())
+  medicineAllottedId Int
+  medicineAllotted   MedicineAllotted  @relation(fields: [medicineAllottedId], references: [id])
+  timing             DateTime          @db.Time()
+}
+
+model PatientProgress {
+  id                 Int                 @id @default(autoincrement())
+  patientConditionId Int
+  patientCondition   PatientCondition    @relation(fields: [patientConditionId], references: [id])
+  description        String?
+  jsonField          Json?
+  followUpStatus     FollowUpStatus
+  percentageRecovery Int?
+  createdAt          DateTime            @default(now())
+}
+
+enum FollowUpStatus {
+  SUCCESSFUL
+  SCHEDULED
+  NOT_ANSWERING
+  FAILED
 }

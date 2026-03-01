@@ -1,0 +1,10 @@
+model Medicine{
+    id Int @id @default(autoincrement())
+    brandName String
+    genericName String
+    dosageForm String
+    dosageStrength String?
+    Manufacturer String
+    medicineAllotteds MedicineAllotted[]
+    @@unique([brandName, genericName,Manufacturer, dosageStrength, dosageForm])
+}
