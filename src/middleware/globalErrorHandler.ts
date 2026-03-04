@@ -2,6 +2,7 @@ import type { Request, Response, NextFunction } from "express";
 import { ZodError } from "zod";
 import { Prisma } from "../../generated/prisma/client";
 import { AppError } from "../utils/AppError";
+import { error } from "../constants/messages";
 
 export const globalErrorHandler = (
   err: unknown,
@@ -39,7 +40,7 @@ export const globalErrorHandler = (
     }
     return res.status(400).json({
       success: false,
-      message: "Database error",
+      message: error.DATABASE_ERROR,
     });
   }
 
@@ -47,6 +48,6 @@ export const globalErrorHandler = (
   console.error("Unexpected Error:", err);
   return res.status(500).json({
     success: false,
-    message: "Internal server error",
+    message: error.INTERNAL_SERVER_ERROR,
   });
 };
