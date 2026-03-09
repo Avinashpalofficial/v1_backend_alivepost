@@ -1,8 +1,10 @@
-import express from "express"
-import patientRouter from "./features/patient/patient.controller"
-import diseaseRouter from "./features/disease/disease.controller"
-const mainRouter = express.Router()
+import express from "express";
+import patientRouter from "./features/patient/patient.controller";
+import diseaseRouter from "./features/disease/disease.controller";
+import medicineRouter from "./features/medicine/medicine.controller";
+const mainRouter = express.Router();
 
-mainRouter.use('/patient', patientRouter)
-mainRouter.use('/disease', diseaseRouter)
-export default mainRouter
+mainRouter.use("/patient", patientRouter);
+mainRouter.use("/disease", diseaseRouter);
+mainRouter.use("/medicine", medicineRouter);
+export default mainRouter;
