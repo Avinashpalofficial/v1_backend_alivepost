@@ -1,6 +1,6 @@
 import express from "express";
 import { MedicineSchema, type MedicineCreateSchema } from "./medicine.schema";
-import { CreateMedicine, MedicineSearch } from "./medicine.service";
+import { CreateMedicine, MedicineDetail, MedicineSearch } from "./medicine.service";
 
 const medicineRouter = express.Router();
 //Create Medicine
@@ -31,4 +31,19 @@ medicineRouter.get("/search", async (req, res, next) => {
     next(error);
   }
 });
+
+//Search medicine by id
+medicineRouter.get("/id", async (req , res , next)=>{
+  try {
+    const value = req.query.id as string
+    const id= parseInt(value)
+    const medicine = await MedicineDetail(id)
+    res.status(200).json({
+      success: true,
+      data: medicine
+    })
+  } catch (error) {
+    next(error)
+  }
+})
 export default medicineRouter;

@@ -26,3 +26,12 @@ export async function MedicineSearch(value: string) {
   });
   return medicine;
 }
+
+export async function MedicineDetail(id:number){
+    const medicine = await prisma.medicine.findUnique({
+        where:{
+            id
+        }
+    })
+    return medicine
+}
