@@ -9,6 +9,15 @@ export async function HospitalCreate(data:HospitalCreate){
             address: data.address,
             userId: data.userId,
             password: data.password,
+        },
+        select:{
+            id: true,
+            name: true,
+            helplineNumber:true,
+            address:true,
+            userId:true,
+            createdAt: true,
+      updatedAt: true
         }
     })
     return hospital;

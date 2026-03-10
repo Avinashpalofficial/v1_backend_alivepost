@@ -1,11 +1,11 @@
-import express from "express"
-import { AuthUser } from "../../middleware/Auth"
-import { HospitalSchema } from "./hospital.schema"
-import { HospitalCreate } from "./hospital.service"
-
-const hospitalRouter = express.Router()
+import express from "express";
+import { AuthUser } from "../../middleware/Auth";
+import { HospitalSchema } from "./hospital.schema";
+import { HospitalCreate } from "./hospital.service";
+import HashPassword from "../../utils/hashUtils";
+const hospitalRouter = express.Router();
 //for now i have removed the admin logic as it require to have admin
-hospitalRouter.post("/create",  async (req, res, next) => {
+hospitalRouter.post("/create", async (req, res, next) => {
   try {
     // const user = req.user!   // guaranteed by middleware
 
@@ -16,18 +16,17 @@ hospitalRouter.post("/create",  async (req, res, next) => {
     //   })
     // }
 
-    const safeData = HospitalSchema.parse(req.body)
-
-    const hospital = await HospitalCreate(safeData)
-
+    let safeData = HospitalSchema.parse(req.body);
+    const hash = await HashPassword(safeData.password);
+    safeData.password = hash;
+    const hospital = await HospitalCreate(safeData);
     res.status(201).json({
       success: true,
-      data: hospital
-    })
-
+      data: hospital,
+    });
   } catch (error) {
-    next(error)
+    next(error);
   }
-})
+});
 
-export default hospitalRouter
+export default hospitalRouter;
