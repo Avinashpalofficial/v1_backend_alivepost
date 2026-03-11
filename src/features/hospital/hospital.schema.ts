@@ -33,4 +33,16 @@ export const HospitalSchema = z.object({
     .regex(/[0-9]/, "Password must contain at least one number")
 })
 
+export const HospitalLoginSchema = z.object({
+    userId: z
+    .string()
+    .min(4, "User ID must be at least 4 characters")
+    .max(50),
+
+  password: z
+    .string()
+    .min(8, "Password must be at least 8 characters")
+    .max(50)
+})
 export type HospitalCreate = z.infer<typeof HospitalSchema>
+export type HospitalLogin = z.infer<typeof HospitalLoginSchema>
