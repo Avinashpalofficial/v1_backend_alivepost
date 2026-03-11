@@ -1,8 +1,9 @@
 import express from "express";
 import { AuthUser } from "../../middleware/Auth";
 import { HospitalLoginSchema, HospitalSchema } from "./hospital.schema";
-import { HospitalCreate, HospitalLogin, SearchHospital } from "./hospital.service";
+import { GetHospitalById, HospitalCreate, HospitalLogin, SearchHospital } from "./hospital.service";
 import HashPassword from "../../utils/hashUtils";
+import { success } from "zod";
 const hospitalRouter = express.Router();
 //for now i have removed the admin logic as it require to have admin
 hospitalRouter.post("/create", async (req, res, next) => {
@@ -56,5 +57,18 @@ hospitalRouter.get('/search', async (req , res , next)=>{
     next(error)
   }
 })
-
+hospitalRouter.get('/id', async (req , res , next)=>{
+  try{
+    
+    const id = req.query.key as string
+    const safeId = parseInt(id)
+    const hospital = await GetHospitalById(safeId)
+    res.status(200).json({
+      success: true,
+      data: hospital
+    })
+  }catch(error){
+    next(error)
+  }
+})
 export default hospitalRouter;

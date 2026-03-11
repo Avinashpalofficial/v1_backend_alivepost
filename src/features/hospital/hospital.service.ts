@@ -68,8 +68,24 @@ export async function SearchHospital(name:string){
     name: true,
     helplineNumber: true,
     address: true,
-    userId: true,
    }
   })
   return hospital
+}
+
+//get hospital by id 
+export async function GetHospitalById(id:number){
+  const hospital = await prisma.hospital.findUnique({
+    where:{
+      id
+    },
+    select:{
+    id: true, 
+    name: true,
+    helplineNumber: true,
+    address: true,
+
+    }
+  })
+  return hospital;
 }
