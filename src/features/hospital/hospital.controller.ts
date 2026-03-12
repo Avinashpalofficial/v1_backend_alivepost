@@ -1,9 +1,11 @@
 import express from "express";
 import { AuthUser } from "../../middleware/Auth";
 import { HospitalLoginSchema, HospitalSchema } from "./hospital.schema";
-import { GetHospitalById, HospitalCreate, HospitalLogin, SearchHospital } from "./hospital.service";
+import { GetHospitalById, GetPatientMedicine, GetPatientMedicineForHospital, GetPatientMedicineforHospital, HospitalCreate, HospitalLogin, SearchHospital } from "./hospital.service";
 import HashPassword from "../../utils/hashUtils";
 import { success } from "zod";
+import { AppError } from "../../utils/AppError";
+import { COMMON_ERROR } from "../../constants/messages";
 const hospitalRouter = express.Router();
 //for now i have removed the admin logic as it require to have admin
 hospitalRouter.post("/create", async (req, res, next) => {
@@ -71,4 +73,23 @@ hospitalRouter.get('/id', async (req , res , next)=>{
     next(error)
   }
 })
+hospitalRouter.get("/patientmedicine", AuthUser, async (req, res, next) => {
+  try {
+    const user = req.user!;
+    const patientId = Number(req.query.patientId);
+
+    if (!patientId || isNaN(patientId)) {
+      throw new AppError("patientId query is required", 400);
+    }
+
+    const result = await GetPatientMedicineForHospital(user, patientId);
+
+    res.status(200).json({
+      success: true,
+      data: result,
+    });
+  } catch (error) {
+    next(error);
+  }
+});
 export default hospitalRouter;

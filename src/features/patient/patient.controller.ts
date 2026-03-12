@@ -160,7 +160,6 @@ patientRouter.get('/condition/assignedmedicine', AuthUser, async (req , res , ne
       data: medicine
     })
   }catch(error){
-    console.log(1)
     next(error)
   }
   

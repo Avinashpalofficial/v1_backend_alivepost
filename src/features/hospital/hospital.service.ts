@@ -1,6 +1,7 @@
 
 
 import prisma from "../../config/prisma";
+import { COMMON_ERROR } from "../../constants/messages";
 import { AppError } from "../../utils/AppError";
 import jwtTokenSigner from "../../utils/jwttokensigner";
 import type { HospitalCreate, HospitalLogin } from "./hospital.schema";
@@ -88,4 +89,26 @@ export async function GetHospitalById(id:number){
     }
   })
   return hospital;
+}
+
+// get medicines of a patient for a hospital
+export async function GetPatientMedicineForHospital(user: { id: number; role: string },patientId: number) {
+  if (user?.role !== "Hospital") {
+    throw new AppError(COMMON_ERROR.INVALID_ROLE, 403);
+  }
+
+  if (!patientId || isNaN(patientId)) {
+    throw new AppError("Invalid patient id", 400);
+  }
+
+  const result = await prisma.medicineAllotted.findMany({
+    where: {
+      patientCondition: {
+        hospitalId: user.id,
+        patientId: patientId,
+      },
+    },
+  });
+
+  return result;
 }
