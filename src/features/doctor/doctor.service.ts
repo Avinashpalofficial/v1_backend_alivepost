@@ -124,3 +124,40 @@ export const searchDoctorsService = async (
 
   return doctors;
 };
+// Get Doctor by ID Service (with Hospital Auth Check)
+export const getDoctorByIdService = async (
+  doctorId: number,
+  hospitalId: number,
+) => {
+  const doctor = await prisma.doctor.findUnique({
+    where: { id: doctorId },
+    select: {
+      id: true,
+      name: true,
+      username: true,
+      hospitalId: true,
+      createdAt: true,
+      updatedAt: true,
+      patientConditions: {
+        select: {
+          id: true,
+          patientId: true,
+        },
+        orderBy: {
+          createdAt: "desc",
+        },
+      },
+    },
+  });
+
+  if (!doctor) {
+    throw new AppError(COMMON_ERROR.INVALID_DOCTOR, 404);
+  }
+
+  // Hospital auth check - only show doctor if they belong to this hospital
+  if (doctor.hospitalId !== hospitalId) {
+    throw new AppError("You are not authorized to view this doctor", 403);
+  }
+
+  return doctor;
+};
