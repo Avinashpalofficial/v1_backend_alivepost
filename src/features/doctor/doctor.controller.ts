@@ -113,5 +113,35 @@ DoctorRouter.get("/search", AuthUser, async (req, res, next) => {
     next(error);
   }
 });
+/**
+ * GET /api/v1/doctor/:id
+ * Get individual doctor by ID
+ */
+DoctorRouter.get("/:id", AuthUser, async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const hospitalId = req.user?.id as number;
+
+    if (!id) {
+      throw new AppError("Doctor ID is required", 400);
+    }
+
+    // Validate param
+    const safeId = getDoctorParamSchema.parse({
+      id,
+    });
+
+    // Call service
+    const doctor = await getDoctorByIdService(safeId.id, hospitalId);
+
+    res.status(200).json({
+      success: true,
+      message: "Doctor information retrieved successfully",
+      data: doctor,
+    });
+  } catch (error) {
+    next(error);
+  }
+});
 
 export default DoctorRouter;
