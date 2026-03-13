@@ -82,3 +82,36 @@ DoctorRouter.get("/hospital/:hospitalId", AuthUser, async (req, res, next) => {
     next(error);
   }
 });
+/**
+ * GET /api/v1/doctor/search?query=xyz
+ * Search doctors by username or name
+ */
+DoctorRouter.get("/search", AuthUser, async (req, res, next) => {
+  try {
+    const { query } = req.query;
+    const hospitalId = req.user?.id as number;
+
+    if (!query || typeof query !== "string") {
+      throw new AppError("Search query is required", 400);
+    }
+
+    // Validate query param
+    const safeData = searchDoctorSchema.parse({
+      query,
+    });
+
+    // Call service
+    const doctors = await searchDoctorsService(safeData.query, hospitalId);
+
+    res.status(200).json({
+      success: true,
+      message: "Search results retrieved successfully",
+      count: doctors.length,
+      data: doctors,
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+export default DoctorRouter;
