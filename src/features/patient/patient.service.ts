@@ -1,5 +1,6 @@
 import prisma from "../../config/prisma";
 import type {
+  AssignMedicineInput,
   MedicalHistoryCreate,
   PatientConditionInput,
   PatientInput,
@@ -148,4 +149,97 @@ export async function PatientConditionCreate(data: PatientConditionInput) {
 
     throw error;
   }
+}
+export async function PatientConditionGet({
+  user,
+  safeId,
+}: {
+  user: { id: number; role: string };
+  safeId: number;
+}) {
+  const where: any = { id: safeId };
+
+  if (user.role === "Patient") where.patientId = user.id;
+  if (user.role === "Hospital") where.hospitalId = user.id;
+  if (user.role === "Doctor") where.doctorId = user.id;
+
+  const condition = await prisma.patientCondition.findMany({ where });
+
+  if (!condition) {
+    throw new AppError("Condition not found or unauthorized", 404);
+  }
+
+  return condition;
+}
+export async function AssignMedicine(data: AssignMedicineInput, user: {id:number, role:string}) {
+
+  const condition = await prisma.patientCondition.findUnique({
+    where: {
+      id: data.patientConditionId
+    }
+  })
+
+  if (!condition) {
+    throw new AppError("Patient condition not found", 404)
+  }
+
+  if (condition.hospitalId !== user.id) {
+    throw new AppError("Unauthorized to modify this condition", 403)
+  }
+
+  const result = await prisma.$transaction(async (tx) => {
+
+    const created = []
+    
+    for (const med of data.medicines) {
+
+      const medicine = await tx.medicineAllotted.create({
+        data: {
+          patientConditionId: data.patientConditionId,
+          medicineId: med.medicineId,
+          quantity: med.quantity,
+          tillDate: med.tillDate,
+
+          timings: {
+            create: med.timings.map((time) => ({
+              timing: new Date(`1970-01-01T${time}`)
+            }))
+          }
+        },
+
+        include: {
+          medicine: true,
+          timings: true
+        }
+      })
+
+      created.push(medicine)
+    }
+
+    return created
+  })
+
+  return result
+}
+
+export async function GetAssignedMedicineForPatient(id:number){
+
+  const result = await prisma.medicineAllotted.findMany({
+    where:{
+      patientCondition:{
+        patientId:id
+      }
+    },
+    include:{
+      medicine:true,
+      timings:true,
+      patientCondition:{
+        include:{
+          disease:true
+        }
+      }
+    }
+  })
+
+  return result
 }

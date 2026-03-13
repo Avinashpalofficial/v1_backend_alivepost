@@ -18,15 +18,21 @@ export const patientSchema = z.object({
     message: PATIENT_ERRORS.GENDER_INVALID,
   }),
 
-  mobileNumber: z
-    .string()
-    .regex(/^[6-9]\d{9}$/, { message: PATIENT_ERRORS.MOBILE_INVALID }),
+ mobileNumber: z
+  .string()
+  .trim()
+  .regex(/^(?:\+91|91)?[6-9]\d{9}$/, {
+    message: PATIENT_ERRORS.MOBILE_INVALID
+  })
 });
 
 export const patientLoginSchema = z.object({
-  mobileNumber: z
-    .string()
-    .regex(/^[6-9]\d{9}$/, { message: PATIENT_ERRORS.MOBILE_INVALID }),
+mobileNumber: z
+  .string()
+  .trim()
+  .regex(/^(?:\+91|91)?[6-9]\d{9}$/, {
+    message: PATIENT_ERRORS.MOBILE_INVALID
+  }),
   dateOfBirth: z.coerce
     .date({ message: PATIENT_ERRORS.DOB_INVALID })
     .refine((date) => date < new Date(), {
@@ -96,7 +102,43 @@ export const PatientConditionSchema = z
     message: COMMON_ERROR.ENDDATE_BEFORE_START,
     path: ["endDate"],
   });
+
+export const AssignMedicineSchema = z.object({
+  patientConditionId: z.number().int().positive(),
+  medicines: z
+    .array(
+      z.object({
+        medicineId: z
+          .number()
+          .int()
+          .positive(),
+
+        quantity: z
+          .number()
+          .int()
+          .positive()
+          .default(1),
+
+        tillDate: z.coerce.date(),
+
+        timings: z
+          .array(
+            z.string().regex(
+              /^([01]\d|2[0-3]):([0-5]\d)$/,
+              "Invalid time format (HH:mm)"
+            )
+          )
+          .min(1, "At least one timing required")
+          .max(10)
+      })
+    )
+    .min(1, "At least one medicine required")
+    .max(20)
+})
+
+
 export type PatientLoginInput = z.infer<typeof patientLoginSchema>;
 export type PatientInput = z.infer<typeof patientSchema>;
 export type MedicalHistoryCreate = z.infer<typeof medicalHistorySchema>;
 export type PatientConditionInput = z.infer<typeof PatientConditionSchema>;
+export type AssignMedicineInput = z.infer<typeof AssignMedicineSchema>

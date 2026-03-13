@@ -7,7 +7,6 @@ model Patient {
   mobileNumber     String              @unique
   medicalHistory   MedicalHistory[]
   conditions       PatientCondition[]
-  medicines        MedicineAllotted[]
   createdAt        DateTime            @default(now())
   updatedAt        DateTime            @updatedAt
 }
@@ -42,6 +41,7 @@ model PatientCondition {
   hospital         Hospital @relation(fields: [hospitalId], references: [id])
   doctorId        Int?
   doctor          Doctor?   @relation(fields: [doctorId], references: [id])
+  medicineAlloted MedicineAllotted[]
   patientProgress PatientProgress[]
   createdAt       DateTime                @default(now())
   updatedAt       DateTime                @updatedAt
@@ -55,14 +55,14 @@ enum PatientConditionStatus {
 
 
 model MedicineAllotted {
-  id         Int               @id @default(autoincrement())
-  patientId  Int
-  patient    Patient           @relation(fields: [patientId], references: [id], onDelete: Cascade)
-  medicineId Int
-  medicine   Medicine          @relation(fields: [medicineId], references: [id], onDelete: Cascade)
-  quantity   Int               @default(1)
-  tillDate   DateTime
-  timings    MedicineTimings[]
+  id                 Int               @id @default(autoincrement())
+  patientConditionId Int
+  patientCondition   PatientCondition  @relation(fields: [patientConditionId], references: [id], onDelete: Cascade)
+  medicineId         Int
+  medicine           Medicine          @relation(fields: [medicineId], references: [id], onDelete: Cascade)
+  quantity           Int               @default(1)
+  tillDate           DateTime
+  timings            MedicineTimings[]
 }
 model MedicineTimings {
   id                 Int               @id @default(autoincrement())

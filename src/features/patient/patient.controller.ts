@@ -1,5 +1,6 @@
 import express, { type NextFunction } from "express";
 import {
+  AssignMedicineSchema,
   medicalHistorySchema,
   PatientConditionSchema,
   patientLoginSchema,
@@ -9,14 +10,18 @@ import {
   type PatientLoginInput,
 } from "./patient.schema";
 import {
+  AssignMedicine,
   CreatePatient,
   DeletePatientService,
+  GetAssignedMedicineForPatient,
   LoginPatient,
   MedicalHistoryCreateService,
   PatientConditionCreate,
+  PatientConditionGet,
 } from "./patient.service";
 import { AuthUser } from "../../middleware/Auth";
-import { COMMON_ERROR, PATIENT_ERRORS } from "../../constants/messages";
+import { AppError } from "../../utils/AppError";
+import { COMMON_ERROR } from "../../constants/messages";
 const patientRouter = express.Router();
 
 patientRouter.post("/create", async (req, res, next) => {
@@ -102,4 +107,61 @@ patientRouter.post("/condition", AuthUser, async (req, res, next) => {
   }
 });
 
+patientRouter.get("/condition/", AuthUser, async (req, res, next) => {
+  try {
+    const user = req.user!;
+    const id = parseInt(req.query.id as string)
+    
+
+    if (!id) {
+      throw new AppError("Invalid condition id", 400);
+    }
+
+    const condition = await PatientConditionGet({ user, safeId: id });
+
+    res.json({
+      success: true,
+      data: condition,
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+patientRouter.post("/condition/medicine", AuthUser, async (req, res, next) => {
+  try {
+    const user = req.user
+    const safeData = AssignMedicineSchema.parse(req.body)
+
+    if (user?.role !== "Hospital") {
+      throw new AppError(COMMON_ERROR.INVALID_ROLE, 403)
+    }
+
+    const result = await AssignMedicine(safeData, user)
+
+    res.status(200).json({
+      success: true,
+      data: result
+    })
+  } catch (error) {
+    next(error)
+  }
+})
+patientRouter.get('/condition/assignedmedicine', AuthUser, async (req , res , next )=>{
+  try{
+
+    const user = req.user;
+    if(user?.role!=="Patient"){
+      throw new AppError(COMMON_ERROR.INVALID_ROLE, 403)
+    }
+    const medicine = await GetAssignedMedicineForPatient(user.id)
+    res.status(200).json({
+      success: true,
+      data: medicine
+    })
+  }catch(error){
+    next(error)
+  }
+  
+})
 export default patientRouter;

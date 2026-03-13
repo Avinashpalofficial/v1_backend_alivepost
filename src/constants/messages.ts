@@ -11,7 +11,8 @@ export const PATIENT_ERRORS = {
   MOBILE_INVALID: "Mobile number must be a valid 10-digit Indian number",
   DISEASE_ID_REQUIRE: "Disease ID is required",
   PATIENT_ID_REQUIRE:"Patient ID is required",
-  INVALID_PATIENT: "Invalid Patient"
+  INVALID_PATIENT: "Invalid Patient",
+  PATIENT_NOT_FOUND: "Patient not found please create patient first"
 };
 export const error = {
   INTERNAL_SERVER_ERROR: "Internal Server Error",
@@ -27,5 +28,6 @@ export const COMMON_ERROR= {
   FOREIGN_KEY_CONSTRAINT: "Foreign Key Contraint Error",
   ID_NOT_FOUND: "ID not found / Passed",
   INVALID_HOSPITAL: "Invalid Hospital",
-  INVALID_DOCTOR: "Invalid Doctor"
+  INVALID_DOCTOR: "Invalid Doctor",
+  INVALID_ROLE: "Invalid Role"
 }
