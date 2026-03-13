@@ -76,3 +76,51 @@ export const listDoctorsByHospitalService = async (hospitalId: number) => {
 
   return doctors;
 };
+
+// Search Doctors Service
+export const searchDoctorsService = async (
+  query: string,
+  hospitalId: number,
+) => {
+  // Verify hospital exists
+  const hospital = await prisma.hospital.findUnique({
+    where: { id: hospitalId },
+  });
+
+  if (!hospital) {
+    throw new AppError(COMMON_ERROR.INVALID_HOSPITAL, 400);
+  }
+
+  const doctors = await prisma.doctor.findMany({
+    where: {
+      hospitalId,
+      OR: [
+        {
+          username: {
+            contains: query,
+            mode: "insensitive",
+          },
+        },
+        {
+          name: {
+            contains: query,
+            mode: "insensitive",
+          },
+        },
+      ],
+    },
+    select: {
+      id: true,
+      name: true,
+      username: true,
+      hospitalId: true,
+      createdAt: true,
+      updatedAt: true,
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
+
+  return doctors;
+};
